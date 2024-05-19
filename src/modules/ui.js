@@ -9,6 +9,7 @@ import {
     isAfter,
     endOfYear,
 } from 'date-fns';
+import { beTarask } from 'date-fns/locale';
 
 class RenderUI {
     static clearElement(element) {
@@ -67,6 +68,15 @@ class RenderUI {
         return editBtn;
     };
 
+    static renderProjectTitle(project) {
+        const projectTitle = document.createElement('div');
+        projectTitle.classList.add('project-title');
+
+        projectTitle.textContent = project.title;
+        return projectTitle;
+        //append to project header
+    }
+
     static renderAddTodoBtn() {
         const addTodoLi = document.createElement('li');
         const addTodo = document.createElement('button');
@@ -75,15 +85,18 @@ class RenderUI {
         addTodoLi.appendChild(addTodo);
         
         return addTodoLi;
-        //append to todolist container
+        //append to todolist container ul
     };
 
-    static renderTodo() {
+    static renderTodo(project, todolist) {
         const todo = document.createElement('li');
         todo.classList.add('todo-item');
 
+        todo.setAttribute('data-todo', todolist.title);
+        todo.setAttribute('data-project', project.title);
+
         return todo;
-        //append to todolist container
+        //append to todolist container ul
     };
 
     static renderTodoContainer() {
@@ -98,9 +111,64 @@ class RenderUI {
         const checkboxContainer = document.createElement('div');
 
         todoCheckbox.setAttribute('type', 'checkbox');
+        todoCheckbox.setAttribute('id', 'todo-checkbox');
+
         checkboxContainer.appendChild(todoCheckbox);
 
         return checkboxContainer;
+    };
+
+    static renderDate(todolist) {
+        if (task.dueDate === '') return '';
+
+        const currentDate = startOfDay(new Date());
+        const startOfWeek = new Date(currentDate);
+        const endOfWeek = endOfDay(addDays(startOfWeek, 6));
+        const todoDate = startOfDay(new Date(todolist.dueDate));
+        const endOfYearDate = endOfYear(currentDate);
+
+        let todoDateText = '';
+
+        if (todolist.done === true) {
+            todoDateText = 'Completed';
+        } else if (isBefore(todoDate, currentDate)) {
+            todoDateText = 'Overdue';
+        } else if (isToday(todoDate)) {
+            todoDateText = 'Today';
+        } else if (isTomorrow(todoDate)) {
+            todoDateText = 'Tomorrow';
+        } else if (
+            isAfter(todoDate, startOfWeek) &&
+            isBefore(todoDate, endOfWeek)
+        ) {
+            todoDateText = format(todoDate, 'EEEE');
+        } else if (
+            isAfter(todoDate, endOfWeek) &&
+            isBefore(todoDate, endOfYearDate)
+        ) {
+            todoDateText = format(todoDate, 'MMM d');
+        } else {
+            todoDateText = format(todoDate, 'MMM d yyyy');
+        }
+        return todoDateText;
+    };
+
+    static renderPriority(todolist) {
+        let priorityText = '';
+
+        switch (todolist.priority) {
+            case 'Urgent':
+                priorityText = 'Urgent';
+                break;
+            case 'Important':
+                priorityText = 'Important';
+                break
+            case 'Not Important':
+                priorityText = 'Not important';
+                break;
+        };
+
+        return priorityText;
     };
 
     static renderTodoName(todolist) {

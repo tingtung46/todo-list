@@ -11,6 +11,10 @@ import {
 } from 'date-fns';
 import { beTarask } from 'date-fns/locale';
 
+const projectContainer = document.querySelector('.project-container');
+const projectHeader = document.querySelector('.project-header');
+const todolistsContainer = document.querySelector('.todolists-container');
+
 class RenderUI {
     static clearElement(element) {
         while (element.firstChild) {
@@ -22,17 +26,17 @@ class RenderUI {
         const addProject = document.createElement('button');
         addProject.textContent = 'Add Project';
         
-        return addProject;
-        //append to project container
+        projectContainer.appendChild(addProject);
     };
 
-    static renderProject() {
+    static renderProject(project) {
         const projectList = document.createElement('li');
         const projectBtnGroup = document.createElement('div');
 
         projectList.classList.add('project-item');
 
-        projectBtnGroup.append(RenderUI.renderProjectList,
+        projectBtnGroup.append(
+            RenderUI.renderProjectName(project),
             RenderUI.deleteButton,
             RenderUI.editButton
         );
@@ -43,13 +47,12 @@ class RenderUI {
 
     static renderProjectName(project) {
         const projectName = document.createElement('button');
-
-        //get project lists from local storage
         
         projectName.textContent = project.title;
-        //append to list container
-        return projectItem;
+        projectName.classList.add('project-name', 'btn');
+        projectName.setAttribute('data-project', project.title);
         
+        return projectName;
     };
 
     static deleteButton() {
@@ -73,8 +76,7 @@ class RenderUI {
         projectTitle.classList.add('project-title');
 
         projectTitle.textContent = project.title;
-        return projectTitle;
-        //append to project header
+        projectHeader.appendChild(projectTitle);
     }
 
     static renderAddTodoBtn() {
@@ -84,8 +86,7 @@ class RenderUI {
         addTodo.textContent = 'Add todo';
         addTodoLi.appendChild(addTodo);
         
-        return addTodoLi;
-        //append to todolist container ul
+        todolistsContainer.appendChild(addTodoLi);
     };
 
     static renderTodo(project, todolist) {
@@ -96,7 +97,6 @@ class RenderUI {
         todo.setAttribute('data-project', project.title);
 
         return todo;
-        //append to todolist container ul
     };
 
     static renderTodoContainer() {
@@ -119,7 +119,7 @@ class RenderUI {
     };
 
     static renderDate(todolist) {
-        if (task.dueDate === '') return '';
+        if (todolist.dueDate === '') return '';
 
         const currentDate = startOfDay(new Date());
         const startOfWeek = new Date(currentDate);
@@ -171,11 +171,43 @@ class RenderUI {
         return priorityText;
     };
 
-    static renderTodoName(todolist) {
-        const todoName = document.createElement('button');
+    static renderTodoDetails(todolist) {
+        const tododetails = document.createElement('div');
+        const todoHead = document.createElement('div');
+        const todoName = document.createElement('div');
+        const todoBtnGroup = document.createElement('div');
+        const todoDesc = document.createElement('div');
 
-        todoName.textContent(todolist.title);
+        todoHead.classList.add('todo-head');
+        todoDesc.classList.add('todo-desc');
 
-        return todoName;
+        todoName.textContent = todolist.title;
+        todoBtnGroup.append(RenderUI.deleteButton, RenderUI.editButton);
+        todoHead.append(todoName, todoBtnGroup);
+
+        if (todolist.dueDate !== '' && todolist.priority !== '') {
+            todoDesc.textContent = `${RenderUI.renderDate} | ${RenderUI.renderPriority}`;
+        } else if (todolist.dueDate !== '' && todolist.priority === '') {
+            todoDesc.textContent = `${RenderUI.renderDate}`;
+        } else if (todolist.dueDate === '' && todolist.priority !== '') {
+            todoDesc.textContent = `${RenderUI.renderPriority}`;
+        };
+
+        tododetails.append(todoHead, todoDesc);
+
+        return tododetails;
+    };
+
+    static renderAllTodolists(project, todolists) {
+        todolists.forEach((todo) => {
+            const todoItem = RenderUI.renderTodo(project, todo);
+            const todoContainer = RenderUI.renderTodoContainer;
+            const todoCheckbox = RenderUI.renderCheckbox;
+            const todoDetails = RenderUI.renderTodoDetails(todo);
+
+            todoContainer.append(todoCheckbox, todoDetails);
+            todoItem.appendChild(todoContainer);
+            todolistsContainer.appendChild(todoItem);
+        });
     };
 };

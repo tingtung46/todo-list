@@ -2,6 +2,7 @@ import {
     format,
     addDays,
     isBefore,
+    isThisWeek,
     startOfDay,
     endOfDay,
     isToday,
@@ -20,6 +21,11 @@ class RenderUI {
         while (element.firstChild) {
             element.removeChild(element.firstChild);
         };
+    };
+
+    static clearProjectDetails() {
+        RenderUI.clearElement(projectHeader);
+        RenderUI.clearElement(todolistsContainer);
     };
     
     static renderAddProjectBtn() {
@@ -49,7 +55,7 @@ class RenderUI {
         const projectName = document.createElement('button');
         
         projectName.textContent = project.title;
-        projectName.classList.add('project-name', 'btn');
+        projectName.classList.add('project-btn');
         projectName.setAttribute('data-project', project.title);
         
         return projectName;
@@ -71,11 +77,11 @@ class RenderUI {
         return editBtn;
     };
 
-    static renderProjectTitle(project) {
+    static renderProjectTitle(projectName) {
         const projectTitle = document.createElement('div');
         projectTitle.classList.add('project-title');
 
-        projectTitle.textContent = project.title;
+        projectTitle.textContent = projectName;
         projectHeader.appendChild(projectTitle);
     }
 
@@ -208,6 +214,62 @@ class RenderUI {
             todoContainer.append(todoCheckbox, todoDetails);
             todoItem.appendChild(todoContainer);
             todolistsContainer.appendChild(todoItem);
+        });
+    };
+
+    static renderProjectItem(projectLists) {
+        RenderUI.clearElement(projectContainer);
+
+        projectLists.forEach((project) => {
+            const projectItem = RenderUI.renderProject(project);
+            projectContainer.appendChild(projectItem);
+        });
+    };
+
+    static renderProjectDetails(project) {
+        RenderUI.clearProjectDetails;
+        RenderUI.renderProjectTitle(project.title);
+        RenderUI.clearElement(todolistsContainer);
+        RenderUI.renderAllTodolists(project, project.todolists);
+        RenderUI.renderAddTodoBtn;
+    };
+
+    static renderAllProjectDetails(projectLists) {
+        RenderUI.clearProjectDetails;
+        RenderUI.renderProjectTitle('All Tasks');
+
+        projectLists.forEach((project) => {
+            RenderUI.renderAllTodolists(project, project.todolists);
+        });
+
+        RenderUI.renderAddTodoBtn;
+    };
+
+    static renderTodayProjectDetails(projectLists) {
+        RenderUI.clearProjectDetails;
+        RenderUI.renderProjectTitle('Today');
+
+        projectLists.forEach((project) => {
+            const todolists = project.todolists.filter((todolist) => {
+                const dayTodolist = startOfDay(new Date(todolist.dueDate));
+                return isToday(dayTodolist);
+            });
+            
+            RenderUI.renderAllTodolists(project, todolists);
+        });
+    };
+
+    static renderThisWeekProject(projectLists) {
+        RenderUI.clearProjectDetails;
+        RenderUI.renderProjectTitle('This week');
+
+        projectLists.forEach((project) => {
+            const todolists = project.todolists.filter((todolist) => {
+                const weekTodolist = startOfDay(new Date(todolist.dueDate));
+                return isThisWeek(weekTodolist);
+            });
+
+            RenderUI.renderAllTodolists(project, todolists);
         });
     };
 };

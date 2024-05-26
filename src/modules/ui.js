@@ -10,7 +10,6 @@ import {
     isAfter,
     endOfYear,
 } from 'date-fns';
-import { beTarask } from 'date-fns/locale';
 
 const projectContainer = document.querySelector('.project-container');
 const projectHeader = document.querySelector('.project-header');
@@ -273,3 +272,5 @@ class RenderUI {
         });
     };
 };
+
+export default RenderUI;

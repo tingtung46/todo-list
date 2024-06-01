@@ -14,6 +14,7 @@ import {
 const projectContainer = document.querySelector('.project-container');
 const projectHeader = document.querySelector('.project-header');
 const todolistsContainer = document.querySelector('.todolists-container');
+const editProjectTitle = document.querySelector('.edit-project-title');
 
 class RenderUI {
     static clearElement(element) {
@@ -42,8 +43,8 @@ class RenderUI {
 
         projectBtnGroup.append(
             RenderUI.renderProjectName(project),
-            RenderUI.deleteButton,
-            RenderUI.editButton
+            RenderUI.deleteButton(project.title),
+            RenderUI.editButton(project.title)
         );
         projectList.appendChild(projectBtnGroup);
         
@@ -60,17 +61,25 @@ class RenderUI {
         return projectName;
     };
 
-    static deleteButton() {
+    static deleteButton(projectTitle, todoTitle = '') {
         const delBtn = document.createElement('button');
         delBtn.textContent = 'Delete';
+        delBtn.setAttribute('data-project', projectTitle);
+        delBtn.classList.add('delete-' + (todoTitle ? 'todo' : 'project') + '-btn');
+
+        if (todoTitle !== '') delBtn.setAttribute('data-todo', todoTitle);
 
         //append to project list and todolist
         return delBtn;
     };
 
-    static editButton() {
+    static editButton(projectTitle, todoTitle = '') {
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
+        editBtn.setAttribute('data-project', projectTitle);
+        editBtn.classList.add('edit-' + (todoTitle ? 'todo' : 'project') + '-btn');
+
+        if (todoTitle !== '') delBtn.setAttribute('data-todo', todoTitle);
 
         //append to project list and todolist
         return editBtn;
@@ -84,9 +93,12 @@ class RenderUI {
         projectHeader.appendChild(projectTitle);
     }
 
-    static renderAddTodoBtn() {
+    static renderAddTodoBtn(projectTitle) {
         const addTodoLi = document.createElement('li');
         const addTodo = document.createElement('button');
+
+        addTodo.classList.add('add-todo-option');
+        addTodo.setAttribute('data-project', projectTitle);
         
         addTodo.textContent = 'Add todo';
         addTodoLi.appendChild(addTodo);
@@ -111,12 +123,15 @@ class RenderUI {
         return todoContainer;
     };
 
-    static renderCheckbox() {
+    static renderCheckbox(projectTitle, todolistTitle) {
         const todoCheckbox = document.createElement('input');
         const checkboxContainer = document.createElement('div');
 
+        todoCheckbox.classList.add('todo-status');
         todoCheckbox.setAttribute('type', 'checkbox');
         todoCheckbox.setAttribute('id', 'todo-checkbox');
+        todoCheckbox.setAttribute('data-project', projectTitle);
+        todoCheckbox.setAttribute('data-todo', todolistTitle);
 
         checkboxContainer.appendChild(todoCheckbox);
 
@@ -176,7 +191,7 @@ class RenderUI {
         return priorityText;
     };
 
-    static renderTodoDetails(todolist) {
+    static renderTodoDetails(project, todolist) {
         const tododetails = document.createElement('div');
         const todoHead = document.createElement('div');
         const todoName = document.createElement('div');
@@ -187,7 +202,10 @@ class RenderUI {
         todoDesc.classList.add('todo-desc');
 
         todoName.textContent = todolist.title;
-        todoBtnGroup.append(RenderUI.deleteButton, RenderUI.editButton);
+        todoBtnGroup.append(
+            RenderUI.deleteButton(project.title, todolist.title),
+            RenderUI.editButton(project.title, todolist.title)
+        );
         todoHead.append(todoName, todoBtnGroup);
 
         if (todolist.dueDate !== '' && todolist.priority !== '') {
@@ -207,13 +225,19 @@ class RenderUI {
         todolists.forEach((todo) => {
             const todoItem = RenderUI.renderTodo(project, todo);
             const todoContainer = RenderUI.renderTodoContainer;
-            const todoCheckbox = RenderUI.renderCheckbox;
-            const todoDetails = RenderUI.renderTodoDetails(todo);
+            const todoCheckbox = RenderUI.renderCheckbox(project.title, todo.title);
+            const todoDetails = RenderUI.renderTodoDetails(project, todo);
 
             todoContainer.append(todoCheckbox, todoDetails);
             todoItem.appendChild(todoContainer);
             todolistsContainer.appendChild(todoItem);
         });
+    };
+
+    static setEditProjectTitle(button) {
+        const projectTitle = button.getAttribute('data-project');
+        editProjectTitle.value = projectTitle;
+        editProjectTitle.setAttribute('data-project', projectTitle);
     };
 
     static renderProjectItem(projectLists) {
@@ -230,7 +254,7 @@ class RenderUI {
         RenderUI.renderProjectTitle(project.title);
         RenderUI.clearElement(todolistsContainer);
         RenderUI.renderAllTodolists(project, project.todolists);
-        RenderUI.renderAddTodoBtn;
+        RenderUI.renderAddTodoBtn(project.title);
     };
 
     static renderAllProjectDetails(projectLists) {
@@ -241,7 +265,7 @@ class RenderUI {
             RenderUI.renderAllTodolists(project, project.todolists);
         });
 
-        RenderUI.renderAddTodoBtn;
+        RenderUI.renderAddTodoBtn('All Tasks');
     };
 
     static renderTodayProjectDetails(projectLists) {
@@ -256,6 +280,8 @@ class RenderUI {
             
             RenderUI.renderAllTodolists(project, todolists);
         });
+
+        RenderUI.renderAddTodoBtn('Today');
     };
 
     static renderThisWeekProject(projectLists) {
@@ -269,6 +295,20 @@ class RenderUI {
             });
 
             RenderUI.renderAllTodolists(project, todolists);
+        });
+
+        RenderUI.renderAddTodoBtn('This Week');
+    };
+
+    static renderProjectDropDown(projectLists, projectDropDown) {
+        RenderUI.clearElement(projectDropDown);
+
+        projectLists.forEach((project) => {
+            const option = document.createElement('option');
+            option.value = project.title;
+            option.textContent = project.title;
+
+            projectDropDown.appendChild(option);
         });
     };
 };

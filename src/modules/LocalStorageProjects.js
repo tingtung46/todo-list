@@ -14,25 +14,33 @@ class LocalStorageProjects {
         return projects;
     };
 
-    static addProjects(title, todoLists) {
-        const projects = this.getProjects();
-        const project = new Project(title, todoLists);
-        projects.push(project);
+    static saveProjects() {
         localStorage.setItem('projects', JSON.stringify(projects));
+    };
+
+    static findProject(title) {
+        projects.find((project) => project.title === title.trim());
+    };
+
+    static addProjects(title) {
+        const projects = LocalStorageProjects.getProjects();
+        const project = new Project(title);
+        projects.push(project);
+        LocalStorageProjects.saveProjects;
     };
 
     static removeProjects(title) {
-        const project = projects.find((project) => project.title === title.trim());
+        const project = LocalStorageProjects.findProject(title);
         projects.splice(projects.indexOf(project), 1);
-        localStorage.setItem('projects', JSON.stringify(projects));
+        LocalStorageProjects.saveProjects;
     };
 
     static editProject(title, newTitle) {
-        const project = projects.find((project) => project.title === title.trim());
+        const project = LocalStorageProjects.findProject(title);
         if (project) {
             project.title = newTitle;
         };
-        localStorage.setItem('projects', JSON.stringify(projects));
+        LocalStorageProjects.saveProjects;
     };
 };
 

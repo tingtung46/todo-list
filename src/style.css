@@ -1,0 +1,53 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Manrope', sans-serif;
+    padding: 0;
+    margin: 0;
+    min-height: 100vh;
+}
+
+ul li {
+    list-style: none;
+}
+
+.wrapper {
+    display: flex;
+}
+
+.sidebar {
+    padding: 1rem;
+    max-width: 300px;
+    height: 100vh;
+    position: sticky;
+    border-right: 1px solid black;
+}
+
+.main-content {
+    max-width: 800px;
+    height: 100vh;
+}
+
+.modal {
+    position: absolute;
+    padding: 1.3rem;
+    background: whitesmoke;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .5);
+    backdrop-filter: blur(3px);
+}
+
+.fade {
+    display: none;
+}

@@ -1,30 +1,28 @@
 import Todo from './todo';
 
-let todoLists = [];
-
-class TodoListsHandle {
-    static addTodoList(project, title, description, dueDate, priority) {
+const todoListHandle = (function() {
+    const addTodoList = (project, title, description, dueDate, priority) => {
         const todoList = new Todo(title, description, dueDate, priority);
         project.todoLists.push(todoList);
     };
-
-    static findTodoList(project, title) {
-        project.todoLists.find((todoList) => todoList.title === title);
+    
+    const findTodoList = (project, title) => {
+        return project.todoLists.find((todoList) => todoList.title === title);
     };
-
-    static removeTodoList(project, title) {
-        const todoList = TodoListsHandle.findTodoList(project, title);
+    
+    const removeTodoList = (project, title) => {
+        const todoList = findTodoList(project, title);
         project.todoLists.splice(project.todoLists.indexOf(todoList), 1);
     };
-
-    static toggleStatus(project, title) {
-        const todoList = TodoListsHandle.findTodoList(project, title);
+    
+    const toggleStatus = (project, title) => {
+        const todoList = findTodoList(project, title);
         if (todoList) {
             todoList.done = todoList.done === false ? true : false;
         };
     };
-
-    static editTodoList(
+    
+    const editTodoList = (
         project,
         title,
         newProject,
@@ -32,8 +30,8 @@ class TodoListsHandle {
         newDescription,
         newDueDate,
         newPriority,
-    ) {
-        const todoList = TodoListsHandle.findTodoList(project, title);
+    ) => {
+        const todoList = findTodoList(project, title);
         if (todoList) {
             if (newProject.title === project.title) {
                 todoList.title = newTitle;
@@ -41,8 +39,8 @@ class TodoListsHandle {
                 todoList.dueDate = newDueDate;
                 todoList.priority = newPriority;
             } else {
-                TodoListsHandle.removeTodoList(project, title);
-                TodoListsHandle.addTodoList(
+                removeTodoList(project, title);
+                addTodoList(
                     newProject,
                     newTitle,
                     newDescription,
@@ -52,6 +50,9 @@ class TodoListsHandle {
             };
         };
     };
-};
 
-export default TodoListsHandle;
+    return {addTodoList, findTodoList, removeTodoList, toggleStatus, editTodoList,}
+})();
+
+
+export default todoListHandle;

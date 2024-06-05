@@ -10,58 +10,85 @@ import {
     isAfter,
     endOfYear,
 } from 'date-fns';
+import configLocalStorage from './LocalStorageProjects';
+import DOM from './DOM';
+import getFormData from './form';
+import todoListHandle from './TodoListsHandle';
 
-const projectContainer = document.querySelector('.project-container');
-const projectHeader = document.querySelector('.project-header');
-const todolistsContainer = document.querySelector('.todolists-container');
-const editProjectTitle = document.querySelector('.edit-project-title');
+const renderUI = (function() {
+    const projectContainer = document.querySelector('.project-container');
+    const projectHeader = document.querySelector('.project-header');
+    const todolistsContainer = document.querySelector('.todolists-container');
+    const editProjectTitle = document.querySelector('#edit-project-title');
+    const overlay = document.querySelector('.overlay');
+    const inpProjectTitle = document.querySelector('#add-project-title');
+    const addProjectBtn = document.querySelector('.add-project-btn');
+    const addProjectForm = document.querySelector('#add-project-form');
+    const editProjectForm = document.querySelector('#edit-project-form');
+    const addTodoModal = document.querySelector('#todo-modal');
+    const addTodoForm = document.querySelector('#add-todo-form');
+    const inpTodoTitle = document.querySelector('#todo-title');
+    const projectDropDown = document.querySelector('#todo-project');
+    const addTodoBtn = document.querySelector('.add-todo-btn');
+    const editTodoForm = document.querySelector('#edit-todo-form');
+    const editTodoTitle = document.querySelector('#edit-todo-title');
+    const addProjectModal = document.querySelector('#project-modal');
+    const editProjectModal = document.querySelector('#edit-project-modal');
+    const addProjectOption = document.querySelector('add-project-option');
+    // const delProjectBtn = document.querySelector('.delete-project-btn');
+    // const editProjectBtn = document.querySelector('.edit-project-btn');
 
-class RenderUI {
-    static clearElement(element) {
+    const clearElement = (element) => {
         while (element.firstChild) {
             element.removeChild(element.firstChild);
         };
     };
 
-    static clearProjectDetails() {
-        RenderUI.clearElement(projectHeader);
-        RenderUI.clearElement(todolistsContainer);
-    };
-    
-    static renderAddProjectBtn() {
-        const addProject = document.createElement('button');
-        addProject.textContent = 'Add Project';
-        
-        projectContainer.appendChild(addProject);
+    const clearProjectDetails = () => {
+        clearElement(projectHeader);
+        clearElement(todolistsContainer);
     };
 
-    static renderProject(project) {
+    const renderAddProjectBtn = () => {
+        const addProject = document.createElement('button');
+        addProject.textContent = 'Add Project';
+        addProject.classList.add('add-project-option');
+    
+        projectContainer.appendChild(addProject);
+
+        addProject.addEventListener('click', () => {
+            overlay.classList.remove('fade');
+            addProjectModal.classList.remove('fade');
+        });
+    };
+
+    const renderProject = (project) => {
         const projectList = document.createElement('li');
         const projectBtnGroup = document.createElement('div');
 
         projectList.classList.add('project-item');
 
         projectBtnGroup.append(
-            RenderUI.renderProjectName(project),
-            RenderUI.deleteButton(project.title),
-            RenderUI.editButton(project.title)
+            renderProjectName(project),
+            deleteButton(project.title),
+            editButton(project.title)
         );
         projectList.appendChild(projectBtnGroup);
-        
+    
         return projectList;
     };
 
-    static renderProjectName(project) {
+    const renderProjectName = (project) => {
         const projectName = document.createElement('button');
-        
+    
         projectName.textContent = project.title;
         projectName.classList.add('project-btn');
         projectName.setAttribute('data-project', project.title);
-        
+    
         return projectName;
     };
 
-    static deleteButton(projectTitle, todoTitle = '') {
+    const deleteButton = (projectTitle, todoTitle = '') => {
         const delBtn = document.createElement('button');
         delBtn.textContent = 'Delete';
         delBtn.setAttribute('data-project', projectTitle);
@@ -69,44 +96,69 @@ class RenderUI {
 
         if (todoTitle !== '') delBtn.setAttribute('data-todo', todoTitle);
 
-        //append to project list and todolist
         return delBtn;
     };
 
-    static editButton(projectTitle, todoTitle = '') {
+    const editButton = (projectTitle, todoTitle = '') => {
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
         editBtn.setAttribute('data-project', projectTitle);
         editBtn.classList.add('edit-' + (todoTitle ? 'todo' : 'project') + '-btn');
 
-        if (todoTitle !== '') delBtn.setAttribute('data-todo', todoTitle);
+        if (todoTitle !== '') editBtn.setAttribute('data-todo', todoTitle);
 
-        //append to project list and todolist
         return editBtn;
     };
 
-    static renderProjectTitle(projectName) {
+    const renderProjectTitle = (projectName) => {
         const projectTitle = document.createElement('div');
         projectTitle.classList.add('project-title');
 
         projectTitle.textContent = projectName;
         projectHeader.appendChild(projectTitle);
-    }
+    };
 
-    static renderAddTodoBtn(projectTitle) {
+    const renderAddTodoBtn = (projectTitle) => {
         const addTodoLi = document.createElement('li');
         const addTodo = document.createElement('button');
 
         addTodo.classList.add('add-todo-option');
         addTodo.setAttribute('data-project', projectTitle);
-        
         addTodo.textContent = 'Add todo';
-        addTodoLi.appendChild(addTodo);
+
+        addTodo.addEventListener('click', () => {
+            const addTodoModal = document.querySelector('#todo-modal');
+            overlay.classList.remove('fade');
+            addTodoModal.classList.remove('fade');
+        });
+
+        inpTodoTitle.addEventListener('input', () => {
+            DOM.todoValidation(inpTodoTitle, projectDropDown, addTodoBtn);
+        });
         
+        addTodoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const todo = getFormData(addTodoForm);
+            todoListHandle.addTodoList(
+                configLocalStorage.findProject(todo.project),
+                todo.title,
+                todo.description,
+                todo.dueDate,
+                todo.prirority,
+            );
+            configLocalStorage.saveProjects();
+            renderCurrentProject();
+            addTodoForm.reset();
+            overlay.classList.add('fade');
+            addTodoModal.classList.add('fade');
+        });
+
+        addTodoLi.appendChild(addTodo);
+    
         todolistsContainer.appendChild(addTodoLi);
     };
 
-    static renderTodo(project, todolist) {
+    const renderTodo = (project, todolist) => {
         const todo = document.createElement('li');
         todo.classList.add('todo-item');
 
@@ -116,14 +168,14 @@ class RenderUI {
         return todo;
     };
 
-    static renderTodoContainer() {
+    const renderTodoContainer = () => {
         const todoContainer = document.createElement('div');
         todoContainer.classList.add('todo-container');
 
         return todoContainer;
     };
 
-    static renderCheckbox(projectTitle, todolistTitle) {
+    const renderCheckbox = (projectTitle, todolistTitle) => {
         const todoCheckbox = document.createElement('input');
         const checkboxContainer = document.createElement('div');
 
@@ -138,7 +190,7 @@ class RenderUI {
         return checkboxContainer;
     };
 
-    static renderDate(todolist) {
+    const renderDate = (todolist) => {
         if (todolist.dueDate === '') return '';
 
         const currentDate = startOfDay(new Date());
@@ -173,7 +225,7 @@ class RenderUI {
         return todoDateText;
     };
 
-    static renderPriority(todolist) {
+    const renderPriority = (todolist) => {
         let priorityText = '';
 
         switch (todolist.priority) {
@@ -191,7 +243,7 @@ class RenderUI {
         return priorityText;
     };
 
-    static renderTodoDetails(project, todolist) {
+    const renderTodoDetails = (project, todolist) => {
         const tododetails = document.createElement('div');
         const todoHead = document.createElement('div');
         const todoName = document.createElement('div');
@@ -203,17 +255,17 @@ class RenderUI {
 
         todoName.textContent = todolist.title;
         todoBtnGroup.append(
-            RenderUI.deleteButton(project.title, todolist.title),
-            RenderUI.editButton(project.title, todolist.title)
+            deleteButton(project.title, todolist.title),
+            editButton(project.title, todolist.title)
         );
         todoHead.append(todoName, todoBtnGroup);
 
         if (todolist.dueDate !== '' && todolist.priority !== '') {
-            todoDesc.textContent = `${RenderUI.renderDate} | ${RenderUI.renderPriority}`;
+            todoDesc.textContent = `${renderDate} | ${renderPriority}`;
         } else if (todolist.dueDate !== '' && todolist.priority === '') {
-            todoDesc.textContent = `${RenderUI.renderDate}`;
+            todoDesc.textContent = `${renderDate}`;
         } else if (todolist.dueDate === '' && todolist.priority !== '') {
-            todoDesc.textContent = `${RenderUI.renderPriority}`;
+            todoDesc.textContent = `${renderPriority}`;
         };
 
         tododetails.append(todoHead, todoDesc);
@@ -221,87 +273,173 @@ class RenderUI {
         return tododetails;
     };
 
-    static renderAllTodolists(project, todolists) {
+    const renderAllTodolists = (project, todolists) => {
         todolists.forEach((todo) => {
-            const todoItem = RenderUI.renderTodo(project, todo);
-            const todoContainer = RenderUI.renderTodoContainer;
-            const todoCheckbox = RenderUI.renderCheckbox(project.title, todo.title);
-            const todoDetails = RenderUI.renderTodoDetails(project, todo);
+            const todoItem = renderTodo(project, todo);
+            const todoContainer = renderTodoContainer();
+            const todoCheckbox = renderCheckbox(project.title, todo.title);
+            const todoDetails = renderTodoDetails(project, todo);
 
             todoContainer.append(todoCheckbox, todoDetails);
             todoItem.appendChild(todoContainer);
             todolistsContainer.appendChild(todoItem);
+
+            const delTodoBtn = document.querySelector('.delete-todo-btn');
+
+            delTodoBtn.addEventListener('click', (e) => {
+                const projectTitle = e.target.getAttribute('data-project');
+                const todoTitle = e.target.getAttribute('data-todo');
+                todoListHandle.removeTodoList(configLocalStorage.findProject(projectTitle), todoTitle);
+                configLocalStorage.saveProjects();
+                renderCurrentProject();
+            });
+
+            editTodoTitle.addEventListener('input', () => {
+                todoValidation(editTodoTitle, projectDropDown, addTodoBtn);
+            });
+            
+            editTodoForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const projectTitle = editTodoBtn.target.getAttribute('data-project');
+                const todoTitle = editTodoTitle.target.getAttribute('data-todo');
+                const newTodo = getFormData(editTodoForm);
+                todoListHandle.editTodoList(
+                    configLocalStorage.findProject(projectTitle),
+                    todoTitle,
+                    configLocalStorage.findProject(newTodo.project),
+                    newTodo.title.trim(),
+                    newTodo.description,
+                    newTodo.dueDate,
+                    newTodo.priority
+                );
+                configLocalStorage.saveProjects();
+                renderCurrentProject();
+                editTodoForm.reset();
+            });
         });
     };
 
-    static setEditProjectTitle(button) {
+    const setEditProjectTitle = (button) => {
         const projectTitle = button.getAttribute('data-project');
         editProjectTitle.value = projectTitle;
         editProjectTitle.setAttribute('data-project', projectTitle);
     };
 
-    static renderProjectItem(projectLists) {
-        RenderUI.clearElement(projectContainer);
+    const renderProjectItem = (projectLists) => {
+        clearElement(projectContainer);
+        renderAddProjectBtn();
 
         projectLists.forEach((project) => {
-            const projectItem = RenderUI.renderProject(project);
+            const projectItem = renderProject(project);
             projectContainer.appendChild(projectItem);
         });
+
+        const delProjectBtn = document.querySelectorAll('.delete-project-btn');
+        const editProjectBtn = document.querySelectorAll('.edit-project-btn');
+    
+        delProjectBtn.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                const projectTitle = e.target.getAttribute('data-project');
+                configLocalStorage.removeProjects(projectTitle);
+                renderProjectItem(configLocalStorage.getProjects());
+            
+                const projectHeader = document.querySelector('.project-header');
+                if (projectHeader.textContent === projectTitle) {
+                    loadProject('Today');
+                } else {
+                    renderCurrentProject();
+                };
+            });
+        });
+    
+        editProjectBtn.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                overlay.classList.remove('fade');
+                editProjectModal.classList.remove('fade');
+            });
+        });
     };
 
-    static renderProjectDetails(project) {
-        RenderUI.clearProjectDetails;
-        RenderUI.renderProjectTitle(project.title);
-        RenderUI.clearElement(todolistsContainer);
-        RenderUI.renderAllTodolists(project, project.todolists);
-        RenderUI.renderAddTodoBtn(project.title);
+    const renderCurrentProject = () => {
+        const projectTitle = document.querySelector('.project-title').textContent;
+        loadProject(projectTitle);
     };
 
-    static renderAllProjectDetails(projectLists) {
-        RenderUI.clearProjectDetails;
-        RenderUI.renderProjectTitle('All Tasks');
+    const renderEditProject = (projectName) => {
+        const projectTitle = document.querySelector('.project-title');
+        projectTitle.textContent = projectName;
+        loadProject(projectTitle.textContent);
+    };
+
+    const loadProject = (projectTitle) => {
+        switch (projectTitle) {
+            case 'All Tasks':
+                renderAllProjectDetails(configLocalStorage.getProjects());
+                break;
+            case 'Today':
+                renderTodayProjectDetails(configLocalStorage.getProjects());
+                break;
+            case 'This Week':
+                renderThisWeekProject(configLocalStorage.getProjects());
+                break;
+            default:
+                renderProjectDetails(configLocalStorage.findProject(projectTitle));
+        };
+    };
+
+    const renderProjectDetails = (project) => {
+        clearProjectDetails();
+        renderProjectTitle(project.title);
+        clearElement(todolistsContainer);
+        renderAllTodolists(project, project.todoLists);
+        renderAddTodoBtn(project.title);
+    };
+
+    const renderAllProjectDetails = (projectLists) => {
+        clearProjectDetails();
+        renderProjectTitle('All Tasks');
 
         projectLists.forEach((project) => {
-            RenderUI.renderAllTodolists(project, project.todolists);
+            renderAllTodolists(project, project.todoLists);
         });
 
-        RenderUI.renderAddTodoBtn('All Tasks');
+        renderAddTodoBtn('All Tasks');
     };
 
-    static renderTodayProjectDetails(projectLists) {
-        RenderUI.clearProjectDetails;
-        RenderUI.renderProjectTitle('Today');
+    const renderTodayProjectDetails = (projectLists) => {
+        clearProjectDetails();
+        renderProjectTitle('Today');
 
         projectLists.forEach((project) => {
-            const todolists = project.todolists.filter((todolist) => {
+            const todolists = project.todoLists.filter((todolist) => {
                 const dayTodolist = startOfDay(new Date(todolist.dueDate));
                 return isToday(dayTodolist);
             });
-            
-            RenderUI.renderAllTodolists(project, todolists);
+        
+            renderAllTodolists(project, todolists);
         });
 
-        RenderUI.renderAddTodoBtn('Today');
+        renderAddTodoBtn('Today');
     };
 
-    static renderThisWeekProject(projectLists) {
-        RenderUI.clearProjectDetails;
-        RenderUI.renderProjectTitle('This week');
+    const renderThisWeekProject = (projectLists) => {
+        clearProjectDetails();
+        renderProjectTitle('This week');
 
         projectLists.forEach((project) => {
-            const todolists = project.todolists.filter((todolist) => {
+            const todolists = project.todoLists.filter((todolist) => {
                 const weekTodolist = startOfDay(new Date(todolist.dueDate));
                 return isThisWeek(weekTodolist);
             });
 
-            RenderUI.renderAllTodolists(project, todolists);
+            renderAllTodolists(project, todolists);
         });
 
-        RenderUI.renderAddTodoBtn('This Week');
+        renderAddTodoBtn('This Week');
     };
 
-    static renderProjectDropDown(projectLists, projectDropDown) {
-        RenderUI.clearElement(projectDropDown);
+    const renderProjectDropDown = (projectLists, projectDropDown) => {
+        clearElement(projectDropDown);
 
         projectLists.forEach((project) => {
             const option = document.createElement('option');
@@ -311,6 +449,19 @@ class RenderUI {
             projectDropDown.appendChild(option);
         });
     };
-};
 
-export default RenderUI;
+return {
+    setEditProjectTitle,
+    renderProjectItem,
+    renderCurrentProject,
+    renderEditProject,
+    renderProjectDetails,
+    renderAllProjectDetails,
+    renderTodayProjectDetails,
+    renderThisWeekProject,
+    renderProjectDropDown,
+    loadProject,
+}
+})();
+
+export default renderUI;

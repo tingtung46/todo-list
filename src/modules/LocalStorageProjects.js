@@ -1,47 +1,48 @@
 import Project from './project'
 
-let projects = [];
+const configLocalStorage = (function() {
+    let projects = [];
 
-class LocalStorageProjects {
-    static getProjects() {
-        if(localStorage.getItem('projects', JSON.parse(projects)) === null) {
+    const getProjects = () => {
+        if(JSON.parse(localStorage.getItem(projects)) === null) {
             localStorage.setItem('projects', JSON.stringify(projects));
-        }
-        else {
-            projects = localStorage.getItem('projects', JSON.parse(projects));
+        } else {
+            projects = JSON.parse(localStorage.getItem(projects));
         };
-
+    
         return projects;
     };
-
-    static saveProjects() {
+    
+    const saveProjects = () => {
         localStorage.setItem('projects', JSON.stringify(projects));
     };
-
-    static findProject(title) {
-        projects.find((project) => project.title === title.trim());
+    
+    const findProject = (title) => {
+        return projects.find((project) => project.title === title.trim());
     };
-
-    static addProjects(title) {
-        const projects = LocalStorageProjects.getProjects();
+    
+    const addProjects = (title) => {
+        const projects = getProjects();
         const project = new Project(title);
         projects.push(project);
-        LocalStorageProjects.saveProjects;
+        saveProjects();
     };
-
-    static removeProjects(title) {
-        const project = LocalStorageProjects.findProject(title);
+    
+    const removeProjects = (title) => {
+        const project = findProject(title);
         projects.splice(projects.indexOf(project), 1);
-        LocalStorageProjects.saveProjects;
+        saveProjects();
     };
-
-    static editProject(title, newTitle) {
-        const project = LocalStorageProjects.findProject(title);
+    
+    const editProject = (title, newTitle) => {
+        const project = findProject(title);
         if (project) {
             project.title = newTitle;
         };
-        LocalStorageProjects.saveProjects;
+        saveProjects();
     };
-};
 
-export default LocalStorageProjects;
+    return {getProjects, saveProjects, findProject, addProjects, removeProjects, editProject,}
+})();
+
+export default configLocalStorage;

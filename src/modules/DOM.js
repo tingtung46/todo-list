@@ -5,8 +5,8 @@ import renderUI from './ui';
 
 const DOM = (function() {
     const sidebar = document.querySelector('.sidebar');
-    const closeBtn = document.querySelector('.close-btn');
-    const cancelBtn = document.querySelector('.cancel-btn');
+    const closeBtn = document.querySelectorAll('.close-btn');
+    const cancelBtn = document.querySelectorAll('.cancel-btn');
     const overlay = document.querySelector('.overlay');
     const addProjectModal = document.querySelector('#project-modal');
     const inpProjectTitle = document.querySelector('#add-project-title');
@@ -19,9 +19,11 @@ const DOM = (function() {
     const editProjectModal = document.querySelector('#edit-project-modal');
     const editProjectForm = document.querySelector('#edit-project-form');
     const todoModal = document.querySelector('#todo-modal');
+    const addTodoForm = document.querySelector('#add-todo-form');
     const projectDropDown = document.querySelector('#todo-project');
     const todolistsContainer = document.querySelector('.todolists-container');
     const editTodoModal = document.querySelector('#edit-todo-modal');
+    const editTodoForm = document.querySelector('#edit-todo-form')
     const editTodoTitle = document.querySelector('#edit-todo-title');
     const editTodoDesc = document.querySelector('#edit-todo-desc');
     const editTodoDate = document.querySelector('#edit-todo-date');
@@ -82,20 +84,24 @@ const DOM = (function() {
     };
     
     const eventListener = () => {
-        closeBtn.addEventListener('click', () => {
-            overlay.classList.add('fade');
-            addProjectModal.classList.add('fade');
-            editProjectModal.classList.add('fade');
-            todoModal.classList.add('fade');
-            editTodoModal.classList.add('fade');
+        closeBtn.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                overlay.classList.add('fade');
+                addProjectModal.classList.add('fade');
+                editProjectModal.classList.add('fade');
+                todoModal.classList.add('fade');
+                editTodoModal.classList.add('fade');
+            });
         });
-
-        cancelBtn.addEventListener('click', () => {
-            overlay.classList.add('fade');
-            addProjectModal.classList.add('fade');
-            editProjectModal.classList.add('fade');
-            todoModal.classList.add('fade');
-            editTodoModal.classList.add('fade');
+        
+        cancelBtn.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                overlay.classList.add('fade');
+                addProjectModal.classList.add('fade');
+                editProjectModal.classList.add('fade');
+                todoModal.classList.add('fade');
+                editTodoModal.classList.add('fade');
+            });
         });
 
         sidebar.addEventListener('click', (e) => {
@@ -154,6 +160,48 @@ const DOM = (function() {
             overlay.classList.add('fade');
             editProjectModal.classList.add('fade');
             renderUI.renderEditProject(newProject.title);
+        });
+
+        addTodoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const todo = getFormData(addTodoForm);
+            todoListsHandle.addTodoList(
+                configLocalStorage.findProject(todo.project),
+                todo.title,
+                todo.description,
+                todo.dueDate,
+                todo.priority,
+            );
+            configLocalStorage.saveProjects();
+            renderUI.renderCurrentProject();
+            addTodoForm.reset();
+            overlay.classList.add('fade');
+            todoModal.classList.add('fade');
+        });
+
+        editTodoTitle.addEventListener('input', () => {
+            todoValidation(editTodoTitle, projectDropDown);
+        });
+        
+        editTodoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const projectTitle = editTodoBtn.getAttribute('data-project');
+            const todoTitle = editTodoTitle.getAttribute('data-todo');
+            const newTodo = getFormData(editTodoForm);
+            todoListsHandle.editTodoList(
+                configLocalStorage.findProject(projectTitle),
+                todoTitle,
+                configLocalStorage.findProject(newTodo.project),
+                newTodo.title.trim(),
+                newTodo.description,
+                newTodo.dueDate,
+                newTodo.priority
+            );
+            configLocalStorage.saveProjects();
+            renderUI.renderCurrentProject();
+            editTodoForm.reset();
+            overlay.classList.add('fade');
+            editTodoModal.classList.add('fade');
         });
     };
 

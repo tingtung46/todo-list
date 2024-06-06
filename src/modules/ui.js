@@ -30,6 +30,7 @@ const renderUI = (function() {
     const inpTodoTitle = document.querySelector('#todo-title');
     const projectDropDown = document.querySelector('#todo-project');
     const addTodoBtn = document.querySelector('.add-todo-btn');
+    const editTodoModal = document.querySelector('#edit-todo-modal');
     const editTodoForm = document.querySelector('#edit-todo-form');
     const editTodoTitle = document.querySelector('#edit-todo-title');
     const addProjectModal = document.querySelector('#project-modal');
@@ -135,23 +136,6 @@ const renderUI = (function() {
         inpTodoTitle.addEventListener('input', () => {
             DOM.todoValidation(inpTodoTitle, projectDropDown, addTodoBtn);
         });
-        
-        addTodoForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const todo = getFormData(addTodoForm);
-            todoListHandle.addTodoList(
-                configLocalStorage.findProject(todo.project),
-                todo.title,
-                todo.description,
-                todo.dueDate,
-                todo.prirority,
-            );
-            configLocalStorage.saveProjects();
-            renderCurrentProject();
-            addTodoForm.reset();
-            overlay.classList.add('fade');
-            addTodoModal.classList.add('fade');
-        });
 
         addTodoLi.appendChild(addTodo);
     
@@ -190,18 +174,18 @@ const renderUI = (function() {
         return checkboxContainer;
     };
 
-    const renderDate = (todolist) => {
-        if (todolist.dueDate === '') return '';
+    const renderDate = (todoList) => {
+        if (todoList.dueDate === '') return '';
 
         const currentDate = startOfDay(new Date());
         const startOfWeek = new Date(currentDate);
         const endOfWeek = endOfDay(addDays(startOfWeek, 6));
-        const todoDate = startOfDay(new Date(todolist.dueDate));
+        const todoDate = startOfDay(new Date(todoList.dueDate));
         const endOfYearDate = endOfYear(currentDate);
 
         let todoDateText = '';
 
-        if (todolist.done === true) {
+        if (todoList.done === true) {
             todoDateText = 'Completed';
         } else if (isBefore(todoDate, currentDate)) {
             todoDateText = 'Overdue';
@@ -225,10 +209,10 @@ const renderUI = (function() {
         return todoDateText;
     };
 
-    const renderPriority = (todolist) => {
+    const renderPriority = (todoList) => {
         let priorityText = '';
 
-        switch (todolist.priority) {
+        switch (todoList.priority) {
             case 'Urgent':
                 priorityText = 'Urgent';
                 break;
@@ -243,7 +227,7 @@ const renderUI = (function() {
         return priorityText;
     };
 
-    const renderTodoDetails = (project, todolist) => {
+    const renderTodoDetails = (project, todoList) => {
         const tododetails = document.createElement('div');
         const todoHead = document.createElement('div');
         const todoName = document.createElement('div');
@@ -253,19 +237,22 @@ const renderUI = (function() {
         todoHead.classList.add('todo-head');
         todoDesc.classList.add('todo-desc');
 
-        todoName.textContent = todolist.title;
+        todoName.textContent = todoList.title;
         todoBtnGroup.append(
-            deleteButton(project.title, todolist.title),
-            editButton(project.title, todolist.title)
+            deleteButton(project.title, todoList.title),
+            editButton(project.title, todoList.title)
         );
         todoHead.append(todoName, todoBtnGroup);
 
-        if (todolist.dueDate !== '' && todolist.priority !== '') {
-            todoDesc.textContent = `${renderDate} | ${renderPriority}`;
-        } else if (todolist.dueDate !== '' && todolist.priority === '') {
-            todoDesc.textContent = `${renderDate}`;
-        } else if (todolist.dueDate === '' && todolist.priority !== '') {
-            todoDesc.textContent = `${renderPriority}`;
+        const todoDateText = renderDate(todoList);
+        const priorityText = renderPriority(todoList);
+
+        if (todoList.dueDate !== '' && todoList.priority !== '') {
+            todoDesc.textContent = `${priorityText} | ${todoDateText}`;
+        } else if (todoList.dueDate !== '' && todoList.priority === '') {
+            todoDesc.textContent = `${todoDateText}`;
+        } else if (todoList.dueDate === '' && todoList.priority !== '') {
+            todoDesc.textContent = `${priorityText}`;
         };
 
         tododetails.append(todoHead, todoDesc);
@@ -274,6 +261,7 @@ const renderUI = (function() {
     };
 
     const renderAllTodolists = (project, todolists) => {
+
         todolists.forEach((todo) => {
             const todoItem = renderTodo(project, todo);
             const todoContainer = renderTodoContainer();
@@ -283,38 +271,25 @@ const renderUI = (function() {
             todoContainer.append(todoCheckbox, todoDetails);
             todoItem.appendChild(todoContainer);
             todolistsContainer.appendChild(todoItem);
+        });
+        
+        const delTodoBtn = document.querySelectorAll('.delete-todo-btn');
+        const editTodoBtn = document.querySelectorAll('.edit-todo-btn');
 
-            const delTodoBtn = document.querySelector('.delete-todo-btn');
-
-            delTodoBtn.addEventListener('click', (e) => {
+        editTodoBtn.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                overlay.classList.remove('fade');
+                editTodoModal.classList.remove('fade');
+            });
+        });
+        
+        delTodoBtn.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
                 const projectTitle = e.target.getAttribute('data-project');
                 const todoTitle = e.target.getAttribute('data-todo');
                 todoListHandle.removeTodoList(configLocalStorage.findProject(projectTitle), todoTitle);
                 configLocalStorage.saveProjects();
                 renderCurrentProject();
-            });
-
-            editTodoTitle.addEventListener('input', () => {
-                todoValidation(editTodoTitle, projectDropDown, addTodoBtn);
-            });
-            
-            editTodoForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const projectTitle = editTodoBtn.target.getAttribute('data-project');
-                const todoTitle = editTodoTitle.target.getAttribute('data-todo');
-                const newTodo = getFormData(editTodoForm);
-                todoListHandle.editTodoList(
-                    configLocalStorage.findProject(projectTitle),
-                    todoTitle,
-                    configLocalStorage.findProject(newTodo.project),
-                    newTodo.title.trim(),
-                    newTodo.description,
-                    newTodo.dueDate,
-                    newTodo.priority
-                );
-                configLocalStorage.saveProjects();
-                renderCurrentProject();
-                editTodoForm.reset();
             });
         });
     };

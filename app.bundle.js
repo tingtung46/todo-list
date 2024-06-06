@@ -1,13 +1,19 @@
+"use strict";
 (self["webpackChunktodo_list"] = self["webpackChunktodo_list"] || []).push([[524],{
 
-/***/ 963:
-/***/ ((__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) => {
+/***/ 125:
+/***/ (() => {
 
-"use strict";
 
-// EXTERNAL MODULE: ./src/modules/project.js
-var modules_project = __webpack_require__(79);
-var project_default = /*#__PURE__*/__webpack_require__.n(modules_project);
+;// CONCATENATED MODULE: ./src/modules/project.js
+class Project {
+    constructor(title) {
+        this.title = title;
+        this.todoLists = [];
+    };
+};
+
+/* harmony default export */ const modules_project = (Project);
 ;// CONCATENATED MODULE: ./src/modules/LocalStorageProjects.js
 
 
@@ -15,10 +21,10 @@ const configLocalStorage = (function() {
     let projects = [];
 
     const getProjects = () => {
-        if(localStorage.getItem('projects', JSON.parse(projects)) === null) {
+        if(JSON.parse(localStorage.getItem(projects)) === null) {
             localStorage.setItem('projects', JSON.stringify(projects));
         } else {
-            projects = localStorage.getItem('projects', JSON.parse(projects));
+            projects = JSON.parse(localStorage.getItem(projects));
         };
     
         return projects;
@@ -29,12 +35,12 @@ const configLocalStorage = (function() {
     };
     
     const findProject = (title) => {
-        projects.find((project) => project.title === title.trim());
+        return projects.find((project) => project.title === title.trim());
     };
     
     const addProjects = (title) => {
         const projects = getProjects();
-        const project = new (project_default())(title);
+        const project = new modules_project(title);
         projects.push(project);
         saveProjects();
     };
@@ -3558,322 +3564,6 @@ function isThisWeek(date, options) {
 // Fallback for modularized imports:
 /* harmony default export */ const date_fns_isThisWeek = ((/* unused pure expression or super */ null && (isThisWeek)));
 
-;// CONCATENATED MODULE: ./src/modules/ui.js
-
-
-const renderUI = (function() {
-    const projectContainer = document.querySelector('.project-container');
-    const projectHeader = document.querySelector('.project-header');
-    const todolistsContainer = document.querySelector('.todolists-container');
-    const editProjectTitle = document.querySelector('.edit-project-title');
-
-    const clearElement = (element) => {
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        };
-    };
-
-    const clearProjectDetails = () => {
-        clearElement(projectHeader);
-        clearElement(todolistsContainer);
-    };
-
-    const renderAddProjectBtn = () => {
-        const addProject = document.createElement('button');
-        addProject.textContent = 'Add Project';
-    
-        projectContainer.appendChild(addProject);
-    };
-
-    renderAddProjectBtn();
-
-    const renderProject = (project) => {
-        const projectList = document.createElement('li');
-        const projectBtnGroup = document.createElement('div');
-
-        projectList.classList.add('project-item');
-
-        projectBtnGroup.append(
-            renderProjectName(project),
-            deleteButton(project.title),
-            editButton(project.title)
-        );
-        projectList.appendChild(projectBtnGroup);
-    
-        return projectList;
-    };
-
-    const renderProjectName = (project) => {
-        const projectName = document.createElement('button');
-    
-        projectName.textContent = project.title;
-        projectName.classList.add('project-btn');
-        projectName.setAttribute('data-project', project.title);
-    
-        return projectName;
-    };
-
-    const deleteButton = (projectTitle, todoTitle = '') => {
-        const delBtn = document.createElement('button');
-        delBtn.textContent = 'Delete';
-        delBtn.setAttribute('data-project', projectTitle);
-        delBtn.classList.add('delete-' + (todoTitle ? 'todo' : 'project') + '-btn');
-
-        if (todoTitle !== '') delBtn.setAttribute('data-todo', todoTitle);
-
-        return delBtn;
-    };
-
-    const editButton = (projectTitle, todoTitle = '') => {
-        const editBtn = document.createElement('button');
-        editBtn.textContent = 'Edit';
-        editBtn.setAttribute('data-project', projectTitle);
-        editBtn.classList.add('edit-' + (todoTitle ? 'todo' : 'project') + '-btn');
-
-        if (todoTitle !== '') delBtn.setAttribute('data-todo', todoTitle);
-
-        return editBtn;
-    };
-
-    const renderProjectTitle = (projectName) => {
-        const projectTitle = document.createElement('div');
-        projectTitle.classList.add('project-title');
-
-        projectTitle.textContent = projectName;
-        projectHeader.appendChild(projectTitle);
-    };
-
-    const renderAddTodoBtn = (projectTitle) => {
-        const addTodoLi = document.createElement('li');
-        const addTodo = document.createElement('button');
-
-        addTodo.classList.add('add-todo-option');
-        addTodo.setAttribute('data-project', projectTitle);
-    
-        addTodo.textContent = 'Add todo';
-        addTodoLi.appendChild(addTodo);
-    
-        todolistsContainer.appendChild(addTodoLi);
-    };
-
-    const renderTodo = (project, todolist) => {
-        const todo = document.createElement('li');
-        todo.classList.add('todo-item');
-
-        todo.setAttribute('data-todo', todolist.title);
-        todo.setAttribute('data-project', project.title);
-
-        return todo;
-    };
-
-    const renderTodoContainer = () => {
-        const todoContainer = document.createElement('div');
-        todoContainer.classList.add('todo-container');
-
-        return todoContainer;
-    };
-
-    const renderCheckbox = (projectTitle, todolistTitle) => {
-        const todoCheckbox = document.createElement('input');
-        const checkboxContainer = document.createElement('div');
-
-        todoCheckbox.classList.add('todo-status');
-        todoCheckbox.setAttribute('type', 'checkbox');
-        todoCheckbox.setAttribute('id', 'todo-checkbox');
-        todoCheckbox.setAttribute('data-project', projectTitle);
-        todoCheckbox.setAttribute('data-todo', todolistTitle);
-
-        checkboxContainer.appendChild(todoCheckbox);
-
-        return checkboxContainer;
-    };
-
-    const renderDate = (todolist) => {
-        if (todolist.dueDate === '') return '';
-
-        const currentDate = startOfDay(new Date());
-        const startOfWeek = new Date(currentDate);
-        const endOfWeek = endOfDay(addDays(startOfWeek, 6));
-        const todoDate = startOfDay(new Date(todolist.dueDate));
-        const endOfYearDate = endOfYear(currentDate);
-
-        let todoDateText = '';
-
-        if (todolist.done === true) {
-            todoDateText = 'Completed';
-        } else if (isBefore(todoDate, currentDate)) {
-            todoDateText = 'Overdue';
-        } else if (isToday(todoDate)) {
-            todoDateText = 'Today';
-        } else if (isTomorrow(todoDate)) {
-            todoDateText = 'Tomorrow';
-        } else if (
-            isAfter(todoDate, startOfWeek) &&
-            isBefore(todoDate, endOfWeek)
-        ) {
-            todoDateText = format(todoDate, 'EEEE');
-        } else if (
-            isAfter(todoDate, endOfWeek) &&
-            isBefore(todoDate, endOfYearDate)
-        ) {
-            todoDateText = format(todoDate, 'MMM d');
-        } else {
-            todoDateText = format(todoDate, 'MMM d yyyy');
-        }
-        return todoDateText;
-    };
-
-    const renderPriority = (todolist) => {
-        let priorityText = '';
-
-        switch (todolist.priority) {
-            case 'Urgent':
-                priorityText = 'Urgent';
-                break;
-            case 'Important':
-                priorityText = 'Important';
-                break
-            case 'Not Important':
-                priorityText = 'Not important';
-                break;
-        };
-
-        return priorityText;
-    };
-
-    const renderTodoDetails = (project, todolist) => {
-        const tododetails = document.createElement('div');
-        const todoHead = document.createElement('div');
-        const todoName = document.createElement('div');
-        const todoBtnGroup = document.createElement('div');
-        const todoDesc = document.createElement('div');
-
-        todoHead.classList.add('todo-head');
-        todoDesc.classList.add('todo-desc');
-
-        todoName.textContent = todolist.title;
-        todoBtnGroup.append(
-            deleteButton(project.title, todolist.title),
-            editButton(project.title, todolist.title)
-        );
-        todoHead.append(todoName, todoBtnGroup);
-
-        if (todolist.dueDate !== '' && todolist.priority !== '') {
-            todoDesc.textContent = `${renderDate} | ${renderPriority}`;
-        } else if (todolist.dueDate !== '' && todolist.priority === '') {
-            todoDesc.textContent = `${renderDate}`;
-        } else if (todolist.dueDate === '' && todolist.priority !== '') {
-            todoDesc.textContent = `${renderPriority}`;
-        };
-
-        tododetails.append(todoHead, todoDesc);
-
-        return tododetails;
-    };
-
-    const renderAllTodolists = (project, todolists) => {
-        todolists.forEach((todo) => {
-            const todoItem = renderTodo(project, todo);
-            const todoContainer = renderTodoContainer();
-            const todoCheckbox = renderCheckbox(project.title, todo.title);
-            const todoDetails = renderTodoDetails(project, todo);
-
-            todoContainer.append(todoCheckbox, todoDetails);
-            todoItem.appendChild(todoContainer);
-            todolistsContainer.appendChild(todoItem);
-        });
-    };
-
-    const setEditProjectTitle = (button) => {
-        const projectTitle = button.getAttribute('data-project');
-        editProjectTitle.value = projectTitle;
-        editProjectTitle.setAttribute('data-project', projectTitle);
-    };
-
-    const renderProjectItem = (projectLists) => {
-        clearElement(projectContainer);
-
-        projectLists.forEach((project) => {
-            const projectItem = renderProject(project);
-            projectContainer.appendChild(projectItem);
-        });
-    };
-
-    const renderProjectDetails = (project) => {
-        clearProjectDetails();
-        renderProjectTitle(project.title);
-        clearElement(todolistsContainer);
-        renderAllTodolists(project, project.todolists);
-        renderAddTodoBtn(project.title);
-    };
-
-    const renderAllProjectDetails = (projectLists) => {
-        clearProjectDetails();
-        renderProjectTitle('All Tasks');
-
-        projectLists.forEach((project) => {
-            renderAllTodolists(project, project.todolists);
-        });
-
-        renderAddTodoBtn('All Tasks');
-    };
-
-    const renderTodayProjectDetails = (projectLists) => {
-        clearProjectDetails();
-        renderProjectTitle('Today');
-
-        projectLists.forEach((project) => {
-            const todolists = project.todolists.filter((todolist) => {
-                const dayTodolist = startOfDay(new Date(todolist.dueDate));
-                return isToday(dayTodolist);
-            });
-        
-            renderAllTodolists(project, todolists);
-        });
-
-        renderAddTodoBtn('Today');
-    };
-
-    const renderThisWeekProject = (projectLists) => {
-        clearProjectDetails();
-        renderProjectTitle('This week');
-
-        projectLists.forEach((project) => {
-            const todolists = project.todolists.filter((todolist) => {
-                const weekTodolist = startOfDay(new Date(todolist.dueDate));
-                return isThisWeek(weekTodolist);
-            });
-
-            renderAllTodolists(project, todolists);
-        });
-
-        renderAddTodoBtn('This Week');
-    };
-
-    const renderProjectDropDown = (projectLists, projectDropDown) => {
-        clearElement(projectDropDown);
-
-        projectLists.forEach((project) => {
-            const option = document.createElement('option');
-            option.value = project.title;
-            option.textContent = project.title;
-
-            projectDropDown.appendChild(option);
-        });
-    };
-
-return {
-    setEditProjectTitle,
-    renderProjectItem,
-    renderProjectDetails,
-    renderAllProjectDetails,
-    renderTodayProjectDetails,
-    renderThisWeekProject,
-    renderProjectDropDown,
-}
-})();
-
-/* harmony default export */ const ui = (renderUI);
 ;// CONCATENATED MODULE: ./src/modules/todo.js
 class Todo {
     constructor(title, description, dueDate, priority) {
@@ -3896,7 +3586,7 @@ const todoListHandle = (function() {
     };
     
     const findTodoList = (project, title) => {
-        project.todoLists.find((todoList) => todoList.title === title);
+        return project.todoLists.find((todoList) => todoList.title === title);
     };
     
     const removeTodoList = (project, title) => {
@@ -3957,38 +3647,42 @@ const getFormData = (form) => Object.fromEntries(new FormData(form));
 
 const DOM = (function() {
     const sidebar = document.querySelector('.sidebar');
-    const addProjectForm = document.querySelector('#add-project-form');
-    const addProjectBtn = document.querySelector('.add-project-btn');
-    const delProjectBtn = document.querySelector('.delete-project-btn');
-    const editProjectForm = document.querySelector('#edit-project-form');
-    const editProjectBtn = document.querySelector('.edit-project-btn');
+    const closeBtn = document.querySelectorAll('.close-btn');
+    const cancelBtn = document.querySelectorAll('.cancel-btn');
+    const overlay = document.querySelector('.overlay');
+    const addProjectModal = document.querySelector('#project-modal');
     const inpProjectTitle = document.querySelector('#add-project-title');
+    const addProjectBtn = document.querySelector('.add-project-btn');
+    const addProjectForm = document.querySelector('#add-project-form');
+    const delProjectBtn = document.querySelector('.delete-project-btn');
+    const editProjectBtn = document.querySelector('.edit-project-btn');
+    const editProject = document.querySelector('.edit-project');
     const editProjectTitle = document.querySelector('#edit-project-title');
-    const todolistsContainer = document.querySelector('.todolists-container');
+    const editProjectModal = document.querySelector('#edit-project-modal');
+    const editProjectForm = document.querySelector('#edit-project-form');
+    const todoModal = document.querySelector('#todo-modal');
     const addTodoForm = document.querySelector('#add-todo-form');
-    const inpTodoTitle = document.querySelector('#todo-title');
     const projectDropDown = document.querySelector('#todo-project');
-    const addTodoBtn = document.querySelector('.add-todo-btn');
-    const delTodoBtn = document.querySelector('.delete-todo-btn');
-    const editTodoForm = document.querySelector('#edit-todo-form');
+    const todolistsContainer = document.querySelector('.todolists-container');
+    const editTodoModal = document.querySelector('#edit-todo-modal');
+    const editTodoForm = document.querySelector('#edit-todo-form')
     const editTodoTitle = document.querySelector('#edit-todo-title');
     const editTodoDesc = document.querySelector('#edit-todo-desc');
     const editTodoDate = document.querySelector('#edit-todo-date');
     const editTodoPriority = document.querySelector('#edit-todo-priority');
     const editProjectDropDown = document.querySelector('#edit-todo-project');
     const editTodoBtn = document.querySelector('.edit-todo-btn');
+
     const baseProject = ['All Tasks', 'Today', 'This Week'];
 
-    const projectValidation = function validateProjectTitle(titleInput, btnProject) {
+    const projectValidation = function validateProjectTitle(titleInput) {
         const projectExist = LocalStorageProjects.findProject(
             titleInput.value.trim()
         ) !== undefined;
         titleInput.setCustomValidity(projectExist ? 'Project already exist' : '');
-    
-        btnProject.preventDefault();
     };
     
-    const todoValidation = function validateTodoTitle(titleInput, projectDropDown, btnTodo) {
+    const todoValidation = function validateTodoTitle(titleInput, projectDropDown) {
         const projectNotFound = LocalStorageProjects.findProject(
             projectDropDown.value.trim()
         ) === undefined;
@@ -3996,7 +3690,7 @@ const DOM = (function() {
             LocalStorageProjects.findProject(
                 projectDropDown.value
             ),
-                titleInput.trim()
+                titleInput.value.trim()
             ) !== undefined;
     
         if (projectNotFound) {
@@ -4006,8 +3700,6 @@ const DOM = (function() {
         } else {
             titleInput.setCustomValidity('')
         };
-    
-        btnTodo.preventDefault();
     };
     
     const taskDetails = function setTaskDetails(button) {
@@ -4027,178 +3719,587 @@ const DOM = (function() {
         editTodoDesc.value = todo.description;
         editTodoDate.value = todo.dueDate;
         editTodoPriority.value = todo.priority;
-        editTodoProject.value = projectTitle;
+        editProjectDropDown.value = projectTitle;
     
         editTodoTitle.setAttribute('data-todo', todoTitle);
         editTodoBtn.setAttribute('data-project', projectTitle);
     };
     
-    const renderProject = (projectTitle) => {
-        switch (projectTitle) {
-            case 'All Tasks':
-                ui.renderAllProjectDetails(LocalStorageProjects.getProjects());
-                break;
-            case 'Today':
-                ui.renderTodayProjectDetails(LocalStorageProjects.getProjects());
-                break;
-            case 'This Week':
-                ui.renderThisWeekProject(LocalStorageProjects.getProjects());
-                break;
-            default:
-                ui.renderProjectDetails(LocalStorageProjects.findProject(projectTitle));
-        };
-    };
-    
-    const renderCurrentProject = () => {
-        const projectTitle = document.querySelector('.project-header');
-        renderProject(projectTitle.textContent);
-    };
-    
-    sidebar.addEventListener('click', (e) => {
-        if (e.target.classList.contains('edit-project-btn')) {
-            ui.setEditProjectTitle(e.target);
-        } else if (e.target.classList.contains('project-btn')) {
-            renderProject(e.target.getAttribute('data-project'));
-        };
-    });
-    
-    todolistsContainer.addEventListener('click', (e) => {
-        if (e.target.classList.contains('add-todo-option')) {
-            ui.renderProjectDropDown(LocalStorageProjects.getProjects(), projectDropDown);
-            taskDetails(e.target);
-        } else if (e.target.classList.contains('edit-todo-btn')) {
-            ui.renderProjectDropDown(LocalStorageProjects.getProjects(), editProjectDropDown);
-            setEditTodoDetails(e.target);
-        } else if (e.target.classList.contains('todo-status')) {
-            const projectTitle = e.target.getAttribute('data-project');
-            const todoTitle = e.target.getAttribute('data-todo');
-    
-            TodoListsHandle.toggleStatus(LocalStorageProjects.findProject(projectTitle), todoTitle);
-            LocalStorageProjects.saveProjects();
-            renderCurrentProject();
-        };
-    });
-    
-    inpProjectTitle.addEventListener('input', () => {
-        projectValidation(inpProjectTitle, addProjectBtn);
-    });
-    
-    addProjectForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const project = modules_form(addProjectForm);
-        LocalStorageProjects.addProjects(project.title.trim());
-        ui.renderProjectItem(LocalStorageProjects.getProjects());
-        addProjectForm.reset();
-        renderProject(project.title);
-    });
-    
-    delProjectBtn.addEventListener('click', (e) => {
-        const projectTitle = e.target.getAttribute('data-project');
-        LocalStorageProjects.removeProjects(projectTitle);
-        ui.renderProjectItem(LocalStorageProjects.getProjects());
-    
-        const projectHeader = document.querySelector('.project-header');
-        if (projectHeader.textContent === projectTitle) {
-            renderProject('Today');
-        } else {
-            renderCurrentProject();
-        };
-    });
-    
-    editProjectTitle.addEventListener('input', () => {
-        projectValidation(editProjectTitle, editProjectBtn);
-    });
-    
-    editProjectForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const projectTitle = editProjectTitle.getAttribute('data-project');
-        const newProject = modules_form(editProjectForm);
-        LocalStorageProjects.editProject(projectTitle, newProject.title.trim());
-        ui.renderProjectItem(LocalStorageProjects.getProjects());
-        editProjectForm.reset();
-        renderCurrentProject();
-    });
-    
-    inpTodoTitle.addEventListener('input', () => {
-        todoValidation(inpTodoTitle, projectDropDown, addTodoBtn);
-    });
-    
-    addTodoForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const todo = modules_form(addTodoForm);
-        TodoListsHandle.addTodoList(
-            LocalStorageProjects.findProject(todo.project),
-            todo.title,
-            todo.description,
-            todo.dueDate,
-            todo.prirority,
-        );
-        LocalStorageProjects.saveProjects();
-        renderCurrentProject();
-        addTodoForm.reset();
-    });
-    
-    delTodoBtn.addEventListener('click', (e) => {
-        const projectTitle = e.target.getAttribute('data-project');
-        const todoTitle = e.target.getAttribute('data-todo');
-        TodoListsHandle.removeTodoList(LocalStorageProjects.findProject(projectTitle), todoTitle);
-        LocalStorageProjects.saveProjects();
-        renderCurrentProject();
-    });
-    
-    editTodoTitle.addEventListener('input', () => {
-        todoValidation(editTodoTitle, projectDropDown, addTodoBtn);
-    });
-    
-    editTodoForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const projectTitle = editTodoBtn.target.getAttribute('data-project');
-        const todoTitle = editTodoTitle.target.getAttribute('data-todo');
-        const newTodo = modules_form(editTodoForm);
-        TodoListsHandle.editTodoList(
-            LocalStorageProjects.findProject(projectTitle),
-            todoTitle,
-            LocalStorageProjects.findProject(newTodo.project),
-            newTodo.title.trim(),
-            newTodo.description,
-            newTodo.dueDate,
-            newTodo.priority
-        );
-        LocalStorageProjects.saveProjects();
-        renderCurrentProject();
-        editTodoForm.reset();
-    });
+    const eventListener = () => {
+        closeBtn.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                overlay.classList.add('fade');
+                addProjectModal.classList.add('fade');
+                editProjectModal.classList.add('fade');
+                todoModal.classList.add('fade');
+                editTodoModal.classList.add('fade');
+            });
+        });
+        
+        cancelBtn.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                overlay.classList.add('fade');
+                addProjectModal.classList.add('fade');
+                editProjectModal.classList.add('fade');
+                todoModal.classList.add('fade');
+                editTodoModal.classList.add('fade');
+            });
+        });
 
-    return {renderProject,}
+        sidebar.addEventListener('click', (e) => {
+            if (e.target.classList.contains('edit-project-btn')) {
+                ui.setEditProjectTitle(e.target);
+
+            } else if (e.target.classList.contains('project-btn')) {
+                ui.loadProject(e.target.getAttribute('data-project'));
+            };
+        });
+        
+        todolistsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('add-todo-option')) {
+                ui.renderProjectDropDown(LocalStorageProjects.getProjects(), projectDropDown);
+                taskDetails(e.target);
+            } else if (e.target.classList.contains('edit-todo-btn')) {
+                ui.renderProjectDropDown(LocalStorageProjects.getProjects(), editProjectDropDown);
+                setEditTodoDetails(e.target);
+            } else if (e.target.classList.contains('todo-status')) {
+                const projectTitle = e.target.getAttribute('data-project');
+                const todoTitle = e.target.getAttribute('data-todo');
+        
+                TodoListsHandle.toggleStatus(LocalStorageProjects.findProject(projectTitle), todoTitle);
+                LocalStorageProjects.saveProjects();
+                ui.renderCurrentProject();
+            };
+        });
+
+        inpProjectTitle.addEventListener('input', () => {
+            projectValidation(inpProjectTitle, addProjectBtn);
+        });
+    
+        addProjectForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const project = modules_form(addProjectForm);
+            LocalStorageProjects.addProjects(project.title.trim());
+            ui.renderProjectItem(LocalStorageProjects.getProjects());
+            console.log(project);
+            ui.loadProject(project.title);
+            addProjectForm.reset();
+            overlay.classList.add('fade');
+            addProjectModal.classList.add('fade');
+        });
+        
+        editProjectTitle.addEventListener('input', () => {
+            projectValidation(editProjectTitle, editProject);
+        });
+        
+        editProjectForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const projectTitle = editProjectTitle.getAttribute('data-project');
+            const newProject = modules_form(editProjectForm);
+            LocalStorageProjects.editProject(projectTitle, newProject.title.trim());
+            ui.renderProjectItem(LocalStorageProjects.getProjects());
+            editProjectForm.reset();
+            overlay.classList.add('fade');
+            editProjectModal.classList.add('fade');
+            ui.renderEditProject(newProject.title);
+        });
+
+        addTodoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const todo = modules_form(addTodoForm);
+            TodoListsHandle.addTodoList(
+                LocalStorageProjects.findProject(todo.project),
+                todo.title,
+                todo.description,
+                todo.dueDate,
+                todo.priority,
+            );
+            LocalStorageProjects.saveProjects();
+            ui.renderCurrentProject();
+            addTodoForm.reset();
+            overlay.classList.add('fade');
+            todoModal.classList.add('fade');
+        });
+
+        editTodoTitle.addEventListener('input', () => {
+            todoValidation(editTodoTitle, projectDropDown);
+        });
+        
+        editTodoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const projectTitle = editTodoBtn.getAttribute('data-project');
+            const todoTitle = editTodoTitle.getAttribute('data-todo');
+            const newTodo = modules_form(editTodoForm);
+            TodoListsHandle.editTodoList(
+                LocalStorageProjects.findProject(projectTitle),
+                todoTitle,
+                LocalStorageProjects.findProject(newTodo.project),
+                newTodo.title.trim(),
+                newTodo.description,
+                newTodo.dueDate,
+                newTodo.priority
+            );
+            LocalStorageProjects.saveProjects();
+            ui.renderCurrentProject();
+            editTodoForm.reset();
+            overlay.classList.add('fade');
+            editTodoModal.classList.add('fade');
+        });
+    };
+
+    return {projectValidation, todoValidation, eventListener,};
 })();
 
 /* harmony default export */ const modules_DOM = (DOM);
+;// CONCATENATED MODULE: ./src/modules/ui.js
+
+
+
+
+
+
+const renderUI = (function() {
+    const projectContainer = document.querySelector('.project-container');
+    const projectHeader = document.querySelector('.project-header');
+    const todolistsContainer = document.querySelector('.todolists-container');
+    const editProjectTitle = document.querySelector('#edit-project-title');
+    const overlay = document.querySelector('.overlay');
+    const inpProjectTitle = document.querySelector('#add-project-title');
+    const addProjectBtn = document.querySelector('.add-project-btn');
+    const addProjectForm = document.querySelector('#add-project-form');
+    const editProjectForm = document.querySelector('#edit-project-form');
+    const addTodoModal = document.querySelector('#todo-modal');
+    const addTodoForm = document.querySelector('#add-todo-form');
+    const inpTodoTitle = document.querySelector('#todo-title');
+    const projectDropDown = document.querySelector('#todo-project');
+    const addTodoBtn = document.querySelector('.add-todo-btn');
+    const editTodoModal = document.querySelector('#edit-todo-modal');
+    const editTodoForm = document.querySelector('#edit-todo-form');
+    const editTodoTitle = document.querySelector('#edit-todo-title');
+    const addProjectModal = document.querySelector('#project-modal');
+    const editProjectModal = document.querySelector('#edit-project-modal');
+    const addProjectOption = document.querySelector('add-project-option');
+    // const delProjectBtn = document.querySelector('.delete-project-btn');
+    // const editProjectBtn = document.querySelector('.edit-project-btn');
+
+    const clearElement = (element) => {
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        };
+    };
+
+    const clearProjectDetails = () => {
+        clearElement(projectHeader);
+        clearElement(todolistsContainer);
+    };
+
+    const renderAddProjectBtn = () => {
+        const addProject = document.createElement('button');
+        addProject.textContent = 'Add Project';
+        addProject.classList.add('add-project-option');
+    
+        projectContainer.appendChild(addProject);
+
+        addProject.addEventListener('click', () => {
+            overlay.classList.remove('fade');
+            addProjectModal.classList.remove('fade');
+        });
+    };
+
+    const renderProject = (project) => {
+        const projectList = document.createElement('li');
+        const projectBtnGroup = document.createElement('div');
+
+        projectList.classList.add('project-item');
+
+        projectBtnGroup.append(
+            renderProjectName(project),
+            deleteButton(project.title),
+            editButton(project.title)
+        );
+        projectList.appendChild(projectBtnGroup);
+    
+        return projectList;
+    };
+
+    const renderProjectName = (project) => {
+        const projectName = document.createElement('button');
+    
+        projectName.textContent = project.title;
+        projectName.classList.add('project-btn');
+        projectName.setAttribute('data-project', project.title);
+    
+        return projectName;
+    };
+
+    const deleteButton = (projectTitle, todoTitle = '') => {
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Delete';
+        delBtn.setAttribute('data-project', projectTitle);
+        delBtn.classList.add('delete-' + (todoTitle ? 'todo' : 'project') + '-btn');
+
+        if (todoTitle !== '') delBtn.setAttribute('data-todo', todoTitle);
+
+        return delBtn;
+    };
+
+    const editButton = (projectTitle, todoTitle = '') => {
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.setAttribute('data-project', projectTitle);
+        editBtn.classList.add('edit-' + (todoTitle ? 'todo' : 'project') + '-btn');
+
+        if (todoTitle !== '') editBtn.setAttribute('data-todo', todoTitle);
+
+        return editBtn;
+    };
+
+    const renderProjectTitle = (projectName) => {
+        const projectTitle = document.createElement('div');
+        projectTitle.classList.add('project-title');
+
+        projectTitle.textContent = projectName;
+        projectHeader.appendChild(projectTitle);
+    };
+
+    const renderAddTodoBtn = (projectTitle) => {
+        const addTodoLi = document.createElement('li');
+        const addTodo = document.createElement('button');
+
+        addTodo.classList.add('add-todo-option');
+        addTodo.setAttribute('data-project', projectTitle);
+        addTodo.textContent = 'Add todo';
+
+        addTodo.addEventListener('click', () => {
+            const addTodoModal = document.querySelector('#todo-modal');
+            overlay.classList.remove('fade');
+            addTodoModal.classList.remove('fade');
+        });
+
+        inpTodoTitle.addEventListener('input', () => {
+            modules_DOM.todoValidation(inpTodoTitle, projectDropDown, addTodoBtn);
+        });
+
+        addTodoLi.appendChild(addTodo);
+    
+        todolistsContainer.appendChild(addTodoLi);
+    };
+
+    const renderTodo = (project, todolist) => {
+        const todo = document.createElement('li');
+        todo.classList.add('todo-item');
+
+        todo.setAttribute('data-todo', todolist.title);
+        todo.setAttribute('data-project', project.title);
+
+        return todo;
+    };
+
+    const renderTodoContainer = () => {
+        const todoContainer = document.createElement('div');
+        todoContainer.classList.add('todo-container');
+
+        return todoContainer;
+    };
+
+    const renderCheckbox = (projectTitle, todolistTitle) => {
+        const todoCheckbox = document.createElement('input');
+        const checkboxContainer = document.createElement('div');
+
+        todoCheckbox.classList.add('todo-status');
+        todoCheckbox.setAttribute('type', 'checkbox');
+        todoCheckbox.setAttribute('id', 'todo-checkbox');
+        todoCheckbox.setAttribute('data-project', projectTitle);
+        todoCheckbox.setAttribute('data-todo', todolistTitle);
+
+        checkboxContainer.appendChild(todoCheckbox);
+
+        return checkboxContainer;
+    };
+
+    const renderDate = (todoList) => {
+        if (todoList.dueDate === '') return '';
+
+        const currentDate = startOfDay(new Date());
+        const startOfWeek = new Date(currentDate);
+        const endOfWeek = endOfDay(addDays(startOfWeek, 6));
+        const todoDate = startOfDay(new Date(todoList.dueDate));
+        const endOfYearDate = endOfYear(currentDate);
+
+        let todoDateText = '';
+
+        if (todoList.done === true) {
+            todoDateText = 'Completed';
+        } else if (isBefore(todoDate, currentDate)) {
+            todoDateText = 'Overdue';
+        } else if (isToday(todoDate)) {
+            todoDateText = 'Today';
+        } else if (isTomorrow(todoDate)) {
+            todoDateText = 'Tomorrow';
+        } else if (
+            isAfter(todoDate, startOfWeek) &&
+            isBefore(todoDate, endOfWeek)
+        ) {
+            todoDateText = format(todoDate, 'EEEE');
+        } else if (
+            isAfter(todoDate, endOfWeek) &&
+            isBefore(todoDate, endOfYearDate)
+        ) {
+            todoDateText = format(todoDate, 'MMM d');
+        } else {
+            todoDateText = format(todoDate, 'MMM d yyyy');
+        }
+        return todoDateText;
+    };
+
+    const renderPriority = (todoList) => {
+        let priorityText = '';
+
+        switch (todoList.priority) {
+            case 'Urgent':
+                priorityText = 'Urgent';
+                break;
+            case 'Important':
+                priorityText = 'Important';
+                break
+            case 'Not Important':
+                priorityText = 'Not important';
+                break;
+        };
+
+        return priorityText;
+    };
+
+    const renderTodoDetails = (project, todoList) => {
+        const tododetails = document.createElement('div');
+        const todoHead = document.createElement('div');
+        const todoName = document.createElement('div');
+        const todoBtnGroup = document.createElement('div');
+        const todoDesc = document.createElement('div');
+
+        todoHead.classList.add('todo-head');
+        todoDesc.classList.add('todo-desc');
+
+        todoName.textContent = todoList.title;
+        todoBtnGroup.append(
+            deleteButton(project.title, todoList.title),
+            editButton(project.title, todoList.title)
+        );
+        todoHead.append(todoName, todoBtnGroup);
+
+        const todoDateText = renderDate(todoList);
+        const priorityText = renderPriority(todoList);
+
+        if (todoList.dueDate !== '' && todoList.priority !== '') {
+            todoDesc.textContent = `${priorityText} | ${todoDateText}`;
+        } else if (todoList.dueDate !== '' && todoList.priority === '') {
+            todoDesc.textContent = `${todoDateText}`;
+        } else if (todoList.dueDate === '' && todoList.priority !== '') {
+            todoDesc.textContent = `${priorityText}`;
+        };
+
+        tododetails.append(todoHead, todoDesc);
+
+        return tododetails;
+    };
+
+    const renderAllTodolists = (project, todolists) => {
+
+        todolists.forEach((todo) => {
+            const todoItem = renderTodo(project, todo);
+            const todoContainer = renderTodoContainer();
+            const todoCheckbox = renderCheckbox(project.title, todo.title);
+            const todoDetails = renderTodoDetails(project, todo);
+
+            todoContainer.append(todoCheckbox, todoDetails);
+            todoItem.appendChild(todoContainer);
+            todolistsContainer.appendChild(todoItem);
+        });
+        
+        const delTodoBtn = document.querySelectorAll('.delete-todo-btn');
+        const editTodoBtn = document.querySelectorAll('.edit-todo-btn');
+
+        editTodoBtn.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                overlay.classList.remove('fade');
+                editTodoModal.classList.remove('fade');
+            });
+        });
+        
+        delTodoBtn.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                const projectTitle = e.target.getAttribute('data-project');
+                const todoTitle = e.target.getAttribute('data-todo');
+                TodoListsHandle.removeTodoList(LocalStorageProjects.findProject(projectTitle), todoTitle);
+                LocalStorageProjects.saveProjects();
+                renderCurrentProject();
+            });
+        });
+    };
+
+    const setEditProjectTitle = (button) => {
+        const projectTitle = button.getAttribute('data-project');
+        editProjectTitle.value = projectTitle;
+        editProjectTitle.setAttribute('data-project', projectTitle);
+    };
+
+    const renderProjectItem = (projectLists) => {
+        clearElement(projectContainer);
+        renderAddProjectBtn();
+
+        projectLists.forEach((project) => {
+            const projectItem = renderProject(project);
+            projectContainer.appendChild(projectItem);
+        });
+
+        const delProjectBtn = document.querySelectorAll('.delete-project-btn');
+        const editProjectBtn = document.querySelectorAll('.edit-project-btn');
+    
+        delProjectBtn.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                const projectTitle = e.target.getAttribute('data-project');
+                LocalStorageProjects.removeProjects(projectTitle);
+                renderProjectItem(LocalStorageProjects.getProjects());
+            
+                const projectHeader = document.querySelector('.project-header');
+                if (projectHeader.textContent === projectTitle) {
+                    loadProject('Today');
+                } else {
+                    renderCurrentProject();
+                };
+            });
+        });
+    
+        editProjectBtn.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                overlay.classList.remove('fade');
+                editProjectModal.classList.remove('fade');
+            });
+        });
+    };
+
+    const renderCurrentProject = () => {
+        const projectTitle = document.querySelector('.project-title').textContent;
+        loadProject(projectTitle);
+    };
+
+    const renderEditProject = (projectName) => {
+        const projectTitle = document.querySelector('.project-title');
+        projectTitle.textContent = projectName;
+        loadProject(projectTitle.textContent);
+    };
+
+    const loadProject = (projectTitle) => {
+        switch (projectTitle) {
+            case 'All Tasks':
+                renderAllProjectDetails(LocalStorageProjects.getProjects());
+                break;
+            case 'Today':
+                renderTodayProjectDetails(LocalStorageProjects.getProjects());
+                break;
+            case 'This Week':
+                renderThisWeekProject(LocalStorageProjects.getProjects());
+                break;
+            default:
+                renderProjectDetails(LocalStorageProjects.findProject(projectTitle));
+        };
+    };
+
+    const renderProjectDetails = (project) => {
+        clearProjectDetails();
+        renderProjectTitle(project.title);
+        clearElement(todolistsContainer);
+        renderAllTodolists(project, project.todoLists);
+        renderAddTodoBtn(project.title);
+    };
+
+    const renderAllProjectDetails = (projectLists) => {
+        clearProjectDetails();
+        renderProjectTitle('All Tasks');
+
+        projectLists.forEach((project) => {
+            renderAllTodolists(project, project.todoLists);
+        });
+
+        renderAddTodoBtn('All Tasks');
+    };
+
+    const renderTodayProjectDetails = (projectLists) => {
+        clearProjectDetails();
+        renderProjectTitle('Today');
+
+        projectLists.forEach((project) => {
+            const todolists = project.todoLists.filter((todolist) => {
+                const dayTodolist = startOfDay(new Date(todolist.dueDate));
+                return isToday(dayTodolist);
+            });
+        
+            renderAllTodolists(project, todolists);
+        });
+
+        renderAddTodoBtn('Today');
+    };
+
+    const renderThisWeekProject = (projectLists) => {
+        clearProjectDetails();
+        renderProjectTitle('This week');
+
+        projectLists.forEach((project) => {
+            const todolists = project.todoLists.filter((todolist) => {
+                const weekTodolist = startOfDay(new Date(todolist.dueDate));
+                return isThisWeek(weekTodolist);
+            });
+
+            renderAllTodolists(project, todolists);
+        });
+
+        renderAddTodoBtn('This Week');
+    };
+
+    const renderProjectDropDown = (projectLists, projectDropDown) => {
+        clearElement(projectDropDown);
+
+        projectLists.forEach((project) => {
+            const option = document.createElement('option');
+            option.value = project.title;
+            option.textContent = project.title;
+
+            projectDropDown.appendChild(option);
+        });
+    };
+
+return {
+    setEditProjectTitle,
+    renderProjectItem,
+    renderCurrentProject,
+    renderEditProject,
+    renderProjectDetails,
+    renderAllProjectDetails,
+    renderTodayProjectDetails,
+    renderThisWeekProject,
+    renderProjectDropDown,
+    loadProject,
+}
+})();
+
+/* harmony default export */ const ui = (renderUI);
 ;// CONCATENATED MODULE: ./src/index.js
 
 
 
 
 
-modules_DOM.renderProject('Today');
-ui.renderProjectItem(LocalStorageProjects.getProjects());
-
-/***/ }),
-
-/***/ 79:
-/***/ (() => {
-
-class Project {
-    constructor(title) {
-        this.title = title;
-        this.todoLists = [];
-    };
-};
+document.addEventListener('DOMContentLoaded', () => {
+    ui.loadProject('Today');
+    ui.renderProjectItem(LocalStorageProjects.getProjects());
+    modules_DOM.eventListener();
+});
 
 /***/ })
 
 },
 /******/ __webpack_require__ => { // webpackRuntimeModules
 /******/ var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-/******/ var __webpack_exports__ = (__webpack_exec__(963));
+/******/ var __webpack_exports__ = (__webpack_exec__(125));
 /******/ }
 ]);
